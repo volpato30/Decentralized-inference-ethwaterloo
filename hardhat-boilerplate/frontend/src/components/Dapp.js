@@ -20,17 +20,20 @@ import { Stake } from "./Stake";
 import { ModelRegistry } from "./ModelRegistry";
 import { UnStake } from "./Unstake";
 import { ResultImage } from "./ResultImage";
-import { Pay } from "./Pay";
-import { TransactionErrorMessage } from "./TransactionErrorMessage";
-import { WaitingForTransactionMessage } from "./WaitingForTransactionMessage";
+import Home from "./Pages/Home";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import searchConfig from "../txt2img_config.json";
+import NavBar from "./Layout/Navbar";
 
 // This is the default id used by the Hardhat Network
 const HARDHAT_NETWORK_ID = "31337";
 
 // This is an error code that indicates that the user canceled a transaction
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
+
+const sample_image =
+  "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=";
 
 // This component is in charge of doing these things:
 //   1. It connects to the user's wallet
@@ -61,6 +64,8 @@ export class Dapp extends React.Component {
       inputPrompt: undefined,
       imageResult: undefined,
       waitingResult: false,
+      jobId: undefined,
+      prompt: undefined,
     };
 
     this.state = this.initialState;
@@ -99,94 +104,60 @@ export class Dapp extends React.Component {
     if (typeof this.state.balance === "undefined") {
       return <Loading />;
     }
-
-    // return (
-    //   <div>
-    //     <h1>Welcome!</h1>
-    //   </div>
-    // )
-
     // If everything is loaded, we render the application.
     return (
       <div className="container p-4">
-        <div className="row">
-          <div className="col-12">
-            <h1>Hi!</h1>
-            <p>
-              Welcome <b>{this.state.selectedAddress}</b>, you have{" "}
-              <b>{ethers.utils.formatEther(this.state.balance).toString()}</b>
-              ETH locked in DI protocol.
-            </p>
-          </div>
-        </div>
 
-        <hr />
-
-        <div className="row">
-          <div className="col-12">
-            {/* 
-              Sending a transaction isn't an immediate action. You have to wait
-              for it to be mined.
-              If we are waiting for one, we show a message here.
-            */}
-            {this.state.txBeingSent && (
-              <WaitingForTransactionMessage txHash={this.state.txBeingSent} />
-            )}
-
-            {/* 
-              Sending a transaction can fail in multiple ways. 
-              If that happened, we show a message here.
-            */}
-            {this.state.transactionError && (
-              <TransactionErrorMessage
-                message={this._getRpcErrorMessage(this.state.transactionError)}
-                dismiss={() => this._dismissTransactionError()}
-              />
-            )}
+        <Router>
+          <NavBar />
+          <div className="row">
+            <div className="col-12">
+              <h1>Hi!</h1>
+              <p>
+                Welcome <b>{this.state.selectedAddress}</b>, you have{" "}
+                <b>{ethers.utils.formatEther(this.state.balance).toString()}</b>
+                ETH locked in DI protocol.
+              </p>
+            </div>
           </div>
-        </div>
-
-        <div className="row">
-          <div className="col-12">
-            {<Pay payFunc={(prompt) => this._pay(prompt)} />}
-          </div>
-        </div>
-
-        {this.state.waitingResult && (<div
-          // style={{
-          //   position: "absolute",
-          //   zIndex: 3,
-          //   top: "50%",
-          //   left: "50%",
-          //   width: "100px",
-          //   height: "50px",
-          //   marginLeft: "-50px",
-          //   marginTop: " -25px",
-          //   textAlign: "center",
-          // }}
-        >
-          <div className="spinner-border" role="status">
-            <span className="sr-only">Waing result...</span>
-          </div>
-        </div>)}
-
-        {this.state.imageResult && (<ResultImage imageResult={this.state.imageResult} />)}
-
-        <div className="row">
-          <div className="col-12">
-            {<Stake stakeFunc={() => this._stake()} />}
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-12">
-            {<UnStake unstakeFunc={() => this._unstake()} />}
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-12">
-            {<ModelRegistry modelRegisterFunc={(url) => this._register_model(url)} />}
-          </div>
-        </div>
+          <hr />
+          <Routes>
+            <Route
+              path="/"
+              exact
+              element={
+                <Home
+                  props={{
+                    selectedAddress: this.state.selectedAddress,
+                    balance: this.state.balance,
+                    txBeingSent: this.state.txBeingSent,
+                    transactionError: this.state.transactionError,
+                    _dismissTransactionError: () => this._dismissNetworkError(),
+                    _pay: (prompt) => this._pay(prompt),
+                    waitingResult: this.state.waitingResult,
+                    imageResult: this.state.imageResult,
+                  }}
+                />
+              }
+            />
+            <Route
+              path="/stake"
+              element={<Stake stakeFunc={() => this._stake()} />}
+            />
+            <Route
+              path="/unstake"
+              element={<UnStake unstakeFunc={() => this._unstake()} />}
+            />
+            <Route
+              path="/modelRegistry"
+              element={
+                <ModelRegistry
+                  modelRegisterFunc={(url) => this._register_model(url)}
+                />
+              }
+            />
+          </Routes>
+        </Router>
       </div>
     );
   }
@@ -262,7 +233,26 @@ export class Dapp extends React.Component {
       contractAddress.AIModelOwnership,
       AIModelOwnershipContractArtifact.abi,
       this._provider.getSigner(0)
-    )
+    );
+
+    // litsener for Job creation event
+    this._contract.on("NewJobCreated", (_worker, _jobId, _modelId, _prompt) => {
+      if (_modelId == 1 && _prompt === this.state.prompt) {
+        console.log("see job event for job: ", _jobId);
+        this.setState({ jobId: _jobId });
+      }
+    });
+
+    // litsener for Job result submission event
+    this._contract.on(
+      "JobSubmited",
+      (_worker, _jobId, _modelId, _resultCId) => {
+        if (_jobId === this.state.jobId) {
+          console.log("see result for job: ", _jobId);
+          this.setState({ imageResult: sample_image, waitingResult: false });
+        }
+      }
+    );
   }
 
   // The next two methods are needed to start and stop polling data. While
@@ -297,8 +287,13 @@ export class Dapp extends React.Component {
       console.log("entering pay function");
       this._dismissTransactionError();
       const options = { value: ethers.utils.parseEther(this.payValue) };
+      this.setState({ prompt: prompt });
       const tx = await this._contract.createNewJob(1, prompt, options);
-      this.setState({ txBeingSent: tx.hash, inputPrompt: prompt, imageResult: undefined });
+      this.setState({
+        txBeingSent: tx.hash,
+        inputPrompt: prompt,
+        imageResult: undefined,
+      });
 
       const receipt = await tx.wait();
 
@@ -306,27 +301,11 @@ export class Dapp extends React.Component {
       if (receipt.status === 0) {
         throw new Error("Transaction failed");
       }
-      // If we got here, the transaction was successful. The user has successfully 
+      // If we got here, the transaction was successful. The user has successfully
       // paid and the server should dispatch the work to worker
       this.setState({ waitingResult: true });
 
-      // TODO: implement job dispatch logic and render result back to customer.
-      const url = "http://127.0.0.1:8889/sdapi/v1/txt2img/";
-      let _searchConfig = JSON.parse(JSON.stringify(searchConfig)); // get a deepcopy
-      searchConfig.prompt = prompt;
-      const fetchParam = {
-        headers: {
-          "content-type": "application/json",
-          "accept": "application/json",
-        },
-        body: JSON.stringify(_searchConfig),
-        method: "POST",
-      };
-
-      const result = await fetch(url, fetchParam).then(data => data.json()).catch(error => console.error(error));
-
-      this.setState({ imageResult: result.images[0], waitingResult: false });
-
+      // waitingResult will be set to false when event listener has seen the corresponding job submission event
     } catch (error) {
       // We check the error code to see if this error was produced because the
       // user rejected a tx. If that's the case, we do nothing.
@@ -343,7 +322,11 @@ export class Dapp extends React.Component {
   async _register_model(url) {
     try {
       this._dismissTransactionError();
-      const tx = await this._modelOwnershipContract.mintModel(this.state.selectedAddress, url, "AI Model");
+      const tx = await this._modelOwnershipContract.mintModel(
+        this.state.selectedAddress,
+        url,
+        "AI Model"
+      );
 
       const receipt = await tx.wait();
 
@@ -377,7 +360,7 @@ export class Dapp extends React.Component {
       if (receipt.status === 0) {
         throw new Error("Transaction failed");
       }
-      // If we got here, the transaction was successful. The user has successfully 
+      // If we got here, the transaction was successful. The user has successfully
       // paid and the server should dispatch the work to worker
 
       // TODO: implement job dispatch logic and render result back to customer.
@@ -393,7 +376,6 @@ export class Dapp extends React.Component {
       this.setState({ txBeingSent: undefined });
     }
   }
-
 
   async _stake() {
     try {
@@ -506,17 +488,6 @@ export class Dapp extends React.Component {
   _dismissNetworkError() {
     this.setState({ networkError: undefined });
   }
-
-  // This is an utility method that turns an RPC error into a human readable
-  // message.
-  _getRpcErrorMessage(error) {
-    if (error.data) {
-      return error.data.message;
-    }
-
-    return error.message;
-  }
-
   // This method resets the state
   _resetState() {
     this.setState(this.initialState);
