@@ -1,0 +1,6 @@
+hardhat-boilerplate/node_modules
+hardhat-boilerplate/.idea
+
+#Hardhat files
+hardhat-boilerplate/cache
+hardhat-boilerplate/artifacts
