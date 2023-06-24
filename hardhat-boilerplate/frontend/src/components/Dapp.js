@@ -31,6 +31,7 @@ const HARDHAT_NETWORK_ID = "31337";
 
 // This is an error code that indicates that the user canceled a transaction
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
+const IPFS_URL = "https://cloudflare-ipfs.com/ipfs/";
 
 const sample_image =
   "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=";
@@ -64,7 +65,7 @@ export class Dapp extends React.Component {
       inputPrompt: undefined,
       imageResult: undefined,
       waitingResult: false,
-      jobId: undefined,
+      jobId: 0,
       prompt: undefined,
     };
 
@@ -197,6 +198,32 @@ export class Dapp extends React.Component {
 
       this._initialize(newAddress);
     });
+
+    this._contract.on(
+      "JobSubmited",
+      async (_worker, _jobId, _modelId, _prompt, _resultCId) => {
+        console.log(
+          "see a result event: ",
+          _jobId,
+          "expecting result for job",
+          this.state.jobId
+        );
+        if (typeof this.state.jobId !== "undefined") {
+          if (_jobId.eq(this.state.jobId)) {
+            console.log("see result for job: ", _jobId);
+            const fetchParam = {
+              method: "GET",
+            };
+            // console.log("start fetching result");
+            // const result = await fetch(IPFS_URL + _resultCId, fetchParam)
+            //   .catch((error) => console.error(error));
+            // console.log("fetched: ", result);
+            this.setState({ imageResult: IPFS_URL + _resultCId, waitingResult: false });
+            console.log("changed image result");
+          }
+        }
+      }
+    );
   }
 
   _initialize(userAddress) {
@@ -235,23 +262,9 @@ export class Dapp extends React.Component {
     );
 
     // litsener for Job creation event
-    this._contract.on("NewJobCreated", (_worker, _jobId, _modelId, _prompt) => {
-      if (_modelId == 1 && _prompt === this.state.prompt) {
-        console.log("see job event for job: ", _jobId);
-        this.setState({ jobId: _jobId });
-      }
-    });
 
     // litsener for Job result submission event
-    this._contract.on(
-      "JobSubmited",
-      (_worker, _jobId, _modelId, _resultCId) => {
-        if (_jobId === this.state.jobId) {
-          console.log("see result for job: ", _jobId);
-          this.setState({ imageResult: sample_image, waitingResult: false });
-        }
-      }
-    );
+    // this._contract.on("JobSubmited", this.onJobSubmit);
   }
 
   // The next two methods are needed to start and stop polling data. While
@@ -294,13 +307,18 @@ export class Dapp extends React.Component {
       const options = { value: ethers.utils.parseEther(this.payValue) };
       this.setState({ prompt: prompt });
       const tx = await this._contract.createNewJob(1, prompt, options);
+
+      const receipt = await tx.wait();
+      const event = receipt.events.find(
+        (event) => event.event === "NewJobCreated"
+      );
+      const [_worker, _jobId, _modelId, _prompt] = event.args;
       this.setState({
         txBeingSent: tx.hash,
         inputPrompt: prompt,
         imageResult: undefined,
+        jobId: _jobId,
       });
-
-      const receipt = await tx.wait();
 
       // The receipt, contains a status flag, which is 0 to indicate an error.
       if (receipt.status === 0) {

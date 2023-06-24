@@ -45,7 +45,6 @@ contract JobManager {
     Counters.Counter private _jobIds;
 
     mapping (uint => address) public jobToConsumer;
-    mapping (uint => address) public jobToWorker;
     mapping (address => uint) _ownerJobCount;
 
     uint _computationJobFee = 0.001 ether;
@@ -80,15 +79,14 @@ contract JobManager {
         jobs.push(job);
         _ownerJobCount[msg.sender]++;
         jobToConsumer[jobId] = msg.sender;
-        jobToWorker[jobId] = worker;
         emit NewJobCreated(worker,jobId,modelId,prompt);
     }
 
 
     // This function is used for workers to submit their Job computation result.
     function submitJob(string calldata cid, uint256 jobId) external {
-        require(msg.sender == jobToWorker[jobId], "only assigned worker can submit job result");
-        Job storage job = jobs[jobId];
+        require(msg.sender == jobToConsumer[jobId], "only assigned worker can submit job result");
+        Job storage job = jobs[jobId-1];
         job.resultCid = cid;
         job.status = Status.Finished;
         emit JobSubmited(msg.sender, job.jobId, job.modelId, job.prompt, cid);

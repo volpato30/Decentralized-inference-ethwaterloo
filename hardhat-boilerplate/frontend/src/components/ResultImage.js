@@ -1,7 +1,8 @@
 import React from "react";
 
 export function ResultImage(props) {
-  const imageStr = 'data:image/png;base64,' + props.imageResult;
+  const imageStr = props.imageResult;
+  console.log("imageStr", imageStr)
     return (
       <div>
         <img 
