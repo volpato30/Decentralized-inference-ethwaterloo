@@ -1,0 +1,12 @@
+compiler:
+  solc:
+    version: 0.8.15 # specify the Solidity version you want to use
+    optimizer:
+      enabled: true
+      runs: 200
+    evm_version: istanbul
+    remappings:
+      - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.9.1"
+
+dependencies:
+  - OpenZeppelin/openzeppelin-contracts@4.9.1
