@@ -107,7 +107,6 @@ export class Dapp extends React.Component {
     // If everything is loaded, we render the application.
     return (
       <div className="container p-4">
-
         <Router>
           <NavBar />
           <div className="row">
@@ -278,8 +277,14 @@ export class Dapp extends React.Component {
   // in the component state.
 
   async _updateBalance() {
-    const balance = await this._contract.balanceOf(this.state.selectedAddress);
-    this.setState({ balance });
+    if (this.state.selectedAddress) {
+      try {
+        const balance = await this._contract.balanceOf(
+          this.state.selectedAddress
+        );
+        this.setState({ balance });
+      } catch (error) {}
+    }
   }
 
   async _pay(prompt) {
