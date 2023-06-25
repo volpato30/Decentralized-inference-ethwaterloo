@@ -1,4 +1,4 @@
-# Arifex
+# Artifex
 
 This project is developed with hardhat and we used React for the frontend. In the backend we used stable-diffusion-web-ui to perform inference and use web3.py to listen to smart contract event and call smart contract functions. The result returned by backend is permanently stored to IPFS and the cid to the object is broadcasted as an event, which will be picked by frontend so that result can be rendered to end users.
 You should be able to follow it by yourself by reading the README and exploring its
