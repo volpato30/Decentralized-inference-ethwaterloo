@@ -48,8 +48,10 @@ to add eth balance on the hardhat test network
 
 
 ### Running with local worker
-Start the SD webui docker following this [guide](https://github.com/AbdBarho/stable-diffusion-webui-docker/wiki/Usage). Then go to /hardhat-boilerplate/scripts/ and run
+Start the SD webui docker following this [guide](https://github.com/AbdBarho/stable-diffusion-webui-docker/wiki/Usage). 
+Create ```credentials.json``` and  save your credentials.
+Then go to /hardhat-boilerplate/scripts/ and run
 ```
 python worker_node.py
 ```
-to start the python backend program.
+to start the python worker node program.
