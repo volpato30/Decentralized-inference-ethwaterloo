@@ -10,8 +10,9 @@ import os
 import json
 import copy
 # add your blockchain connection information
-hardhat_rpc = "http://127.0.0.1:8545/"
+hardhat_rpc = "https://rpc.chiadochain.net"
 web3 = Web3(Web3.HTTPProvider(hardhat_rpc))
+print(web3)
 
 sd_url = "http://127.0.0.1:7860/sdapi/v1/txt2img/"
 
