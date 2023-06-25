@@ -1,12 +1,7 @@
-# Hardhat Boilerplate
+# Arifex
 
-This repository contains a sample project that you can use as the starting point
-for your Ethereum project. It's also a great fit for learning the basics of
-smart contract development.
-
-This project is intended to be used with the
-[Hardhat Beginners Tutorial](https://hardhat.org/tutorial), but you should be
-able to follow it by yourself by reading the README and exploring its
+This project is developed with hardhat and we used React for the frontend. In the backend we used stable-diffusion-web-ui to perform inference and use web3.py to listen to smart contract event and call smart contract functions. The result returned by backend is permanently stored to IPFS and the cid to the object is broadcasted as an event, which will be picked by frontend so that result can be rendered to end users.
+You should be able to follow it by yourself by reading the README and exploring its
 `contracts`, `tests`, `scripts` and `frontend` directories.
 
 ## Quick start
@@ -15,7 +10,7 @@ The first things you need to do are cloning this repository and installing its
 dependencies:
 
 ```sh
-cd hardhat-boilerplate
+cd artifex
 npm install
 ```
 
@@ -55,6 +50,6 @@ to add eth balance on the hardhat test network
 ### Running with local worker
 Start the SD webui docker following this [guide](https://github.com/AbdBarho/stable-diffusion-webui-docker/wiki/Usage). Then go to /hardhat-boilerplate/scripts/ and run
 ```
-python event_listening.py
+python worker_node.py
 ```
 to start the python backend program.
