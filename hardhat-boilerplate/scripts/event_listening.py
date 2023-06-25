@@ -23,7 +23,7 @@ with open("credentials.json", "r") as f:
 with open("txt2img_config.json", "r") as f:
     SEARCH_CONFIG = json.load(f)
 
-with open("../frontend/contracts/contract-address.json", "r") as f:
+with open("../frontend/src/contracts/contract-address.json", "r") as f:
     u = json.load(f)
     contract_address = u["JobManager"]
 with open("../frontend/src/contracts/JobManager.json", "r") as f:
