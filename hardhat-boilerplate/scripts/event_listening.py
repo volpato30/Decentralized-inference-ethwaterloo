@@ -52,14 +52,14 @@ def inference(model_id, prompt):
           "content-type": "application/json",
           "accept": "application/json",
         },
-        "body": json.dump(search_config),
+        "body": json.dumps(search_config),
         "method": "POST",
     }
     print("querying sd")
     response = requests.post(url=sd_url, json=payload)
     r = response.json()
     print("got result")
-    return r["images"]
+    return r["images"][-1]
 
 def upload_result_to_ipfs(result, file_name, bucket):
     """
