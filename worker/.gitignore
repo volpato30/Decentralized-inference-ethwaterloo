@@ -1,8 +1,0 @@
-__pycache__
-.env
-.history
-.hypothesis/
-build/
-reports/
-/build
-.DS_Store.DS_Store
